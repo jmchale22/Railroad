@@ -11,17 +11,15 @@
    #BEE
    
    #LIQ+#RFI+#SHIB+#DOGE = #BEE
-
    #SAFEMOON features:
    3% fee auto add to the liquidity pool to locked forever when selling
    2% fee auto distribute to all holders
    I created a black hole so #Bee token will deflate itself in supply with every transaction
    50% Supply is burned at start.
    
-
  */
-
-pragma solidity ^0.6.12;
+//pragma solidity ^0.6.12;
+pragma solidity ^0.8.1;
 // SPDX-License-Identifier: Unlicensed
 interface IERC20 {
 
@@ -253,7 +251,7 @@ library SafeMath {
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
+        return msg.sender;      //qqq getting compiler error here 
     }
 
     function _msgData() internal view virtual returns (bytes memory) {
@@ -470,7 +468,7 @@ contract Ownable is Context {
         return _lockTime;
     }
 
-    //Locks the contract for owner for the amount of time provided
+    //Locks the contract for owner for the amount of time provided       //qqq getting compiler errors not to use "now"
     function lock(uint256 time) public virtual onlyOwner {
         _previousOwner = _owner;
         _owner = address(0);
@@ -841,8 +839,8 @@ contract SafeMoon is Context, IERC20, Ownable {
     function deliver(uint256 tAmount) public {
         address sender = _msgSender();
         require(!_isExcluded[sender], "Excluded addresses cannot call this function");
-     // (uint256 rAmount,,,,,) = _getValues(tAmount);
-        (uint256 rAmount,,,,,,,) = _getValues(tAmount);  // aaa added 2 commas qqq 
+      // (uint256 rAmount,,,,) = _getValues(tAmount);
+      (uint256 rAmount,,,,,,) = _getValues(tAmount);  // aaa added 2 commas qqq 
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rTotal = _rTotal.sub(rAmount);
         _tFeeTotal = _tFeeTotal.add(tAmount);
@@ -851,12 +849,12 @@ contract SafeMoon is Context, IERC20, Ownable {
     function reflectionFromToken(uint256 tAmount, bool deductTransferFee) public view returns(uint256) {
         require(tAmount <= _tTotal, "Amount must be less than supply");
         if (!deductTransferFee) {
-       //   (uint256 rAmount,,,,,) = _getValues(tAmount);
-            (uint256 rAmount,,,,,,,) = _getValues(tAmount);  // aaa add 2 commas qqq 
+        // (uint256 rAmount,,,,,) = _getValues(tAmount);
+            (uint256 rAmount,,,,,,) = _getValues(tAmount);  // aaa add 2 commas qqq 
             return rAmount;
         } else {
-       //   (,uint256 rTransferAmount,,,,) = _getValues(tAmount);
-            (,uint256 rTransferAmount,,,,,,) = _getValues(tAmount);  // aaa add 2 commas qqq 
+        // (,uint256 rTransferAmount,,,,) = _getValues(tAmount);
+            (,uint256 rTransferAmount,,,,,) = _getValues(tAmount);  // aaa add 2 commas qqq 
             return rTransferAmount;
         }
     }
@@ -1026,7 +1024,7 @@ contract SafeMoon is Context, IERC20, Ownable {
     
     function removeAllFee() private {
         // if(_taxFee == 0 && _liquidityFee == 0) return;
-        if(_taxFee == 0 && _liquidityFee == 0 && treasuryFee == 0) return;      // aaa add treasury 
+        if(_taxFee == 0 && _liquidityFee == 0 && _treasuryFee == 0) return;      // aaa add treasury 
         _previousTaxFee = _taxFee;
         _previousLiquidityFee = _liquidityFee;
         _previousTreasuryFee = _treasuryFee;                                    // aaa add treasury fee
@@ -1224,4 +1222,3 @@ contract SafeMoon is Context, IERC20, Ownable {
 // The treasury fee we want is most similar to the liquidity tax so we are cloing that one
 // aaa = Added     "aaa" in the comment means this line added or updated by Railroad developer , also helps count number of changes (45 as of May 2 2021)
 // qqq = revisit me   "qqq" in the comment means this line may require an update
-// This is proof of concept and not written by the project's solidity developer.
